@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Gestor de Despesas de Viaturas (Nativo e Estável)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .btn-logout {
+      background: #6c757d;
+    }
+
+    .btn-voltar {
+      background: #28a745;
+      margin-top: 15px;
+    }
+
+    .resumo {
+      background: #f4f4f4;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .seccao {
+      display: none;
+    }
+
+    .link-alternar {
+      color: #007bff;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 10px;
+      display: inline-block;
+    }
+
+    .lista-carros {
+      margin-top: 20px;
+    }
+
+    .item-carro {
+      background: #e9ecef;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .item-carro:hover {
+      background: #dee2e6;
+    }
+
+    /* ESTILOS NATIVOS PARA O RESUMO DE GASTOS EM BARRAS */
+    .painel-gastos {
+      background: #fdfdfd;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+
+    .categoria-barra {
+      margin-bottom: 10px;
+    }
+
+    .label-barra {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .fundo-barra {
+      background: #eee;
+      width: 100%;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .preenchimento-barra {
+      background: #007bff;
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ESTILOS PARA O MODO ESCURO (NOVO) */
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .resumo,
+    body.dark-mode .painel-gastos,
+    body.dark-mode div[style*='background: #f8f9fa'],
+    body.dark-mode div[style*='background: #fff3cd'] {
+      background-color: #1e1e1e !important;
+      border-color: #333 !important;
+      color: #e0e0e0 !important;
+    }
+
+    body.dark-mode .item-carro {
+      background-color: #2a2a2a;
+      color: #ffffff;
+    }
+
+    body.dark-mode .item-carro:hover {
+      background-color: #3a3a3a;
+    }
+
+    body.dark-mode th {
+      background-color: #252525;
+      color: #ffffff;
+    }
+
+    body.dark-mode td,
+    body.dark-mode th {
+      border-color: #444;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select {
+      background-color: #2a2a2a;
+      color: #ffffff;
+      border: 1px solid #555;
+    }
+
+    body.dark-mode input:focus,
+    body.dark-mode select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    body.dark-mode input[readonly] {
+      background-color: #1e1e1e !important;
+      color: #888;
+    }
+
+    body.dark-mode .fundo-barra {
+      background-color: #333;
+    }
+
+    /* ESTILOS PARA A NAVBAR (NOVO) */
+    .navbar {
+      background-color: #007bff;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    /* Ajuste automático para o Modo Escuro */
+    body.dark-mode .navbar {
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- BARRA DE NAVEGAÇÃO / NAVBAR (ESTRUTURA LIMPA PARA VS CODE) -->
+  <nav class="navbar-global" style="
+        background: #007bff !important;
+        color: #ffffff !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 12px 20px !important;
+        font-family: Arial, sans-serif !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      ">
+    <div style="
+          font-weight: bold;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #ffffff !important;
+        ">
+      ⛽ <span>Gestor de Viaturas</span>
+    </div>
+    <div>
+      <a href="mailto:chitandala@gmail.com" style="
+            color: #ffffff !important;
+            text-decoration: none !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+          " onclick="alert('A abrir o seu cliente de e-mail para contacto com o suporte.')">📧 Contacto</a>
+    </div>
+  </nav>
+
+  <!-- O resto do seu código (Carrossel, etc.) continua logo abaixo -->
+
+  <!-- CARROSSEL PUBLICITÁRIO NATIVO (COM IMAGENS LOCAIS) -->
+  <div style="
+        max-width: 700px;
+        margin: 15px auto;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
+        height: 120px;
+        background: #000;
+      ">
+    <div id="contentorCarrossel" style="
+          display: flex;
+          width: 300%;
+          height: 100%;
+          transition: transform 0.6s ease-in-out;
+        ">
+      <!-- Banner 1: Oficina -->
+      <a href="https://wa.link/bikqsn" target="_blank" style="
+            width: 100%;
+            height: 100%;
+            position: relative;
+            text-decoration: none;
+          " onclick="alert(
+            // 'Campanha: Desconto de 15% em Calços!'
+            )">
+        <img src="imagens/oficina.JPG" style="
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              filter: brightness(0.55);
+            " />
+        <div style="
+              position: absolute;
+              bottom: 15px;
+              left: 20px;
+              color: white;
+              font-family: Arial, sans-serif;
+            ">
+          <span style="
+                background: #dc3545;
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-weight: bold;
+                text-transform: uppercase;
+              ">Reservado para publidade</span>
+          <h3 style="margin: 5px 0 2px 0; font-size: 16px">
+            <!-- Revisão Geral com 15% de Desconto -->
+          </h3>
+          <p style="margin: 0; font-size: 12px; color: #ddd">
+            <!-- Mantenha a manutenção da sua viatura em dia com os melhores
+            especialistas. -->
+          </p>
+        </div>
+      </a>
+
+      <!-- Banner 2: Seguros -->
+      <a href="https://wa.link/bikqsn" target="_blank" style="
+            width: 100%;
+            height: 100%;
+            position: relative;
+            text-decoration: none;
+          " onclick="alert(
+            // 'Campanha: Simule já o seu Seguro Automóvel com a nossa corretora parceira!'
+            )">
+        <img src="imagens/seguros.JPG" style="
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              filter: brightness(0.55);
+            " />
+        <div style="
+              position: absolute;
+              bottom: 15px;
+              left: 20px;
+              color: white;
+              font-family: Arial, sans-serif;
+            ">
+          <span style="
+                background: #28a745;
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-weight: bold;
+                text-transform: uppercase;
+              ">Reservado para publidade</span>
+          <h3 style="margin: 5px 0 2px 0; font-size: 16px">
+            <!-- Proteja Quem Mais Ama -->
+          </h3>
+          <p style="margin: 0; font-size: 12px; color: #ddd">
+            <!-- Simule o seu seguro automóvel e poupe até 120€ anuais nas suas
+            validades. -->
+          </p>
+        </div>
+      </a>
+
+      <!-- Banner 3: Pneus -->
+      <a href="https://wa.link/bikqsn" style="
+            width: 100%;
+            height: 100%;
+            position: relative;
+            text-decoration: none;
+          " onclick="alert(
+            // 'Campanha: Pague 3 pneus e leve 4. Promoção válida até ao final do mês.'
+            )">
+        <img src="imagens/pneus.JPG" target="_blank" style="
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              filter: brightness(0.55);
+            " />
+        <div style="
+              position: absolute;
+              bottom: 15px;
+              left: 20px;
+              color: white;
+              font-family: Arial, sans-serif;
+            ">
+          <span style="
+                background: #007bff;
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-weight: bold;
+                text-transform: uppercase;
+              ">Reservado para publidade</span>
+          <h3 style="margin: 5px 0 2px 0; font-size: 16px">
+            <!-- Leve 4 Pneus, Pague Apenas 3 -->
+          </h3>
+          <p style="margin: 0; font-size: 12px; color: #ddd">
+            <!-- Segurança máxima no asfalto com as marcas líderes de mercado. -->
+          </p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- BOTÃO ALTERNAR TEMA (NOVO) -->
+  <div style="text-align: right; max-width: 700px; margin: 10px auto">
+    <button id="btnAlternarTema" style="
+          width: auto;
+          background: #6c757d;
+          padding: 5px 10px;
+          font-size: 13px;
+        ">
+      🌓 Mudar Tema
+    </button>
+  </div>
+
+  <!-- ECRÃ 1: LOGIN -->
+  <div id="seccaoLogin" class="seccao" style="display: block">
+    <h2>Entrar no Sistema</h2>
+    <form id="formLogin">
+      <div class="form-group">
+        <label>E-mail:</label>
+        <input type="email" id="loginEmail" required />
+      </div>
+      <div class="form-group">
+        <label>Palavra-passe:</label>
+        <input type="password" id="loginPassword" required />
+      </div>
+      <button type="submit">Iniciar Sessão</button>
+    </form>
+    <span class="link-alternar" id="btnIrParaRegisto">Não tem conta? Registe-se aqui</span>
+  </div>
+
+  <!-- ECRÃ 2: REGISTO -->
+  <div id="seccaoRegisto" class="seccao">
+    <h2>Criar Nova Conta</h2>
+    <form id="formRegisto">
+      <div class="form-group">
+        <label>E-mail:</label>
+        <input type="email" id="registoEmail" required />
+      </div>
+      <div class="form-group">
+        <label>Palavra-passe:</label>
+        <input type="password" id="registoPassword" required />
+      </div>
+      <button type="submit">Criar Conta</button>
+    </form>
+    <span class="link-alternar" id="btnIrParaLogin">Já tem conta? Faça login aqui</span>
+  </div>
+
+  <!-- ECRÃ 3: GARAGEM -->
+  <div id="seccaoGaragem" class="seccao">
+    <div style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        ">
+      <h2>A Minha Garagem</h2>
+      <button class="btn-logout btnSairGeral" style="width: auto">
+        Sair
+      </button>
+    </div>
+
+    <form id="formViatura">
+      <h3>Adicionar Nova Viatura</h3>
+      <div class="form-group">
+        <label>Marca / Modelo:</label>
+        <input type="text" id="carroNome" placeholder="Ex: Renault Clio" required />
+      </div>
+      <div class="form-group">
+        <label>Matrícula / Placa:</label>
+        <input type="text" id="carroMatricula" placeholder="Ex: AA-00-BB" required />
+      </div>
+      <div class="form-group">
+        <label for="carroCombustivel">Tipo de Combustível:</label>
+        <select id="carroCombustivel" required>
+          <option value="Gasolina">Gasolina</option>
+          <option value="Gasóleo">Gasóleo / Diesel</option>
+          <option value="GPL">GPL</option>
+          <option value="Elétrico">Elétrico</option>
+          <option value="Híbrido">Híbrido</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Foto da Viatura (Opcional):</label>
+        <input type="file" id="carroFoto" accept="image/*" style="padding: 5px 0" />
+      </div>
+
+      <button type="submit">Registar Viatura</button>
+    </form>
+
+    <h3>Escolha uma Viatura para ver as Despesas:</h3>
+    <div id="containerCarros" class="lista-carros"></div>
+  </div>
+
+  <!-- ECRÃ 5: PAINEL DE ADMINISTRAÇÃO (ATUALIZADO) -->
+  <div id="seccaoAdmin" class="seccao">
+    <div style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #343a40;
+          color: white;
+          padding: 10px 15px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+        ">
+      <h2 style="margin: 0; font-size: 18px">
+        🛡️ Painel Geral de Administração
+      </h2>
+      <button class="btn-logout btnSairGeral" style="width: auto; margin-bottom: 0; background: #dc3545">
+        Sair
+      </button>
+    </div>
+
+    <div style="
+          background: #e9ecef;
+          padding: 15px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+          color: #333;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 15px;
+        ">
+      <div>
+        <p style="margin: 0; font-weight: bold">
+          Estatísticas Gerais do Sistema:
+        </p>
+        <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 14px">
+          <li>
+            Total de Contas de Utilizadores:
+            <strong id="totalUsersAdmin">0</strong>
+          </li>
+          <li>
+            Total de Viaturas Registadas:
+            <strong id="totalCarrosAdmin">0</strong>
+          </li>
+        </ul>
+      </div>
+      <!-- Botão de exportação global adicionado aqui -->
+      <button id="btnExportarGlobalAdmin" style="
+            width: auto;
+            margin-bottom: 0;
+            background: #28a745;
+            padding: 10px 15px;
+          ">
+        Exportar Base de Dados Total (Excel)
+      </button>
+    </div>
+
+    <h3>Histórico Global de Registos</h3>
+    <div id="listaGeralAdmin" style="display: flex; flex-direction: column; gap: 20px"></div>
+  </div>
+
+  <!-- ECRÃ 4: APLICAÇÃO DE DESPESAS -->
+  <div id="seccaoApp" class="seccao">
+    <div style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        ">
+      <!-- TITULO E FOTO DA VIATURA ATIVA (ATUALIZADO) -->
+      <div style="
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+          " id="blocoInfoViatura">
+        <div id="fotoCarroAtivoContainer"></div>
+        <div>
+          <h2 style="margin: 0 0 5px 0">
+            Despesas: <span id="tituloCarroAtivo"></span>
+          </h2>
+          <p style="margin: 0">
+            Viatura Selecionada: <strong id="matriculaAtiva"></strong>
+          </p>
+        </div>
+      </div>
+
+      <button class="btn-logout btnSairGeral" style="width: auto">
+        Sair
+      </button>
+    </div>
+    <!-- <p>Viatura Selecionada: <strong id="matriculaAtiva"></strong></p> -->
+
+    <form id="formDespesa">
+      <div class="form-group">
+        <label for="data">Data:</label>
+        <input type="date" id="data" required />
+      </div>
+      <div class="form-group">
+        <label for="categoria">Categoria:</label>
+        <select id="categoria" required>
+          <option value="Combustível">Combustível</option>
+          <option value="Manutenção">Manutenção</option>
+          <option value="Seguro">Seguro</option>
+          <option value="Impostos">Impostos / IUC</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="valor">Valor / Montante:</label>
+        <input type="number" id="valor" step="0.01" required />
+      </div>
+      <div class="form-group">
+        <label for="km">Quilometragem Atual (km):</label>
+        <input type="number" id="km" required />
+      </div>
+      <div class="form-group" id="grupoLitros">
+        <label for="litros">Litros Abastecidos (L):</label>
+        <input type="number" id="litros" step="0.01" value="0" readonly
+          style="background: #e9ecef; cursor: not-allowed" />
+      </div>
+      <!-- CAMPO DINÂMICO PARA OBSERVAÇÕES (NOVO) -->
+      <div class="form-group" id="grupoObservacao" style="display: none">
+        <label for="observacao">Descrição / Observação:</label>
+        <input type="text" id="observacao" placeholder="Ex: Compra de radiador / Pneus" />
+      </div>
+
+      <button type="submit">Gravar Despesa</button>
+    </form>
+
+    <!-- PAINEL DE ALERTAS DE MANUTENÇÃO (NOVO) -->
+    <div id="painelAlertas" style="
+          background: #fff3cd;
+          border: 1px solid #ffeba2;
+          color: #856404;
+          padding: 15px;
+          margin: 15px 0;
+          border-radius: 5px;
+          display: none;
+        ">
+      <h4 style="margin: 0 0 10px 0">⚠️ Alertas de Manutenção Pendentes</h4>
+      <ul id="listaAlertas" style="margin: 0; padding-left: 20px"></ul>
+    </div>
+
+    <!-- CONFIGURAÇÃO DE MANUTENÇÃO (NOVO) -->
+    <!-- EXIBIÇÃO SIMPLIFICADA DA PRÓXIMA REVISÃO -->
+    <div style="
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          padding: 12px;
+          margin: 15px 0;
+          border-radius: 5px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 10px;
+        ">
+      <p style="font-size: 14px; margin: 0; font-weight: bold; color: #333">
+        Próxima revisão estimada aos:
+        <span id="txtProximaRevisao" style="color: #007bff">--</span> km
+      </p>
+      <span class="link-alternar" id="btnAlternarPainelRevisao" style="font-size: 12px; margin-top: 0">⚙️ Alterar
+        plano</span>
+    </div>
+
+    <!-- CONFIGURAÇÃO INTERNA DO PLANO DE REVISÕES (OCULTA POR PADRÃO) -->
+    <div id="painelConfigRevisao" style="
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          padding: 15px;
+          margin: -10px 0 15px 0;
+          border-radius: 0 0 5px 5px;
+          border-top: none;
+          display: none;
+        ">
+      <h4 style="margin: 0 0 10px 0; font-size: 14px">
+        Definir Plano de Revisões
+      </h4>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap">
+        <input type="number" id="configKmRevisao" placeholder="Intervalo em km (Ex: 10000)"
+          style="flex: 1; min-width: 150px" />
+        <button id="btnSalvarConfig" style="width: auto; margin: 0; background: #6c757d">
+          Definir Intervalo
+        </button>
+      </div>
+    </div>
+
+    <!-- ALTERNAR EXIBIÇÃO DO PREÇO DO COMBUSTÍVEL -->
+    <div style="margin: 15px 0">
+      <span class="link-alternar" id="btnAlternarPainelPreco" style="font-size: 13px">⚙️ Atualizar ou configurar preço
+        do combustível</span>
+    </div>
+
+    <!-- CONFIGURAÇÃO DO PREÇO DO COMBUSTÍVEL -->
+    <div id="painelConfigPreco" style="
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          padding: 15px;
+          margin: 15px 0;
+          border-radius: 5px;
+          display: none;
+        ">
+      <h4 style="margin: 0 0 10px 0">Definir Preço do Combustível</h4>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap">
+        <input type="number" id="configPrecoLitro" step="0.001" placeholder="Preço por Litro (Ex: 1.749)"
+          style="flex: 1; min-width: 150px" />
+        <button id="btnSalvarPreco" style="width: auto; margin: 0; background: #6c757d">
+          Definir Preço
+        </button>
+      </div>
+      <p style="font-size: 12px; color: #666; margin: 5px 0 0 0">
+        Preço atual configurado: <strong id="txtPrecoAtual">--</strong> / L
+      </p>
+    </div>
+
+    <!-- CONFIGURAÇÃO DE DATAS DE VALIDADE (NOVO) -->
+    <!-- EXIBIÇÃO SIMPLIFICADA DOS PRAZOS LEGAIS -->
+    <div style="
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          padding: 15px;
+          margin: 15px 0;
+          border-radius: 5px;
+        ">
+      <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+          ">
+        <h4 style="margin: 0; font-size: 14px">Prazos de Validade Legais</h4>
+        <span class="link-alternar" id="btnAlternarPainelValidades" style="font-size: 12px; margin-top: 0">⚙️ Atualizar
+          datas</span>
+      </div>
+
+      <!-- Notificações sempre visíveis -->
+      <div id="statusValidades" style="
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+          ">
+        <div>Seguro: <strong id="txtStatusSeguro">--</strong></div>
+        <div>Inspeção (IPO): <strong id="txtStatusIpo">--</strong></div>
+      </div>
+
+      <!-- CONFIGURAÇÃO INTERNA DE DATAS (OCULTA POR PADRÃO) -->
+      <div id="painelConfigValidades" style="
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #dee2e6;
+            display: none;
+          ">
+        <div style="
+              display: flex;
+              gap: 10px;
+              flex-wrap: wrap;
+              margin-bottom: 10px;
+            ">
+          <div style="flex: 1; min-width: 140px">
+            <label style="font-size: 12px; font-weight: bold">Vencimento do Seguro:</label>
+            <input type="date" id="configDataSeguro" />
+          </div>
+          <div style="flex: 1; min-width: 140px">
+            <label style="font-size: 12px; font-weight: bold">Próxima Inspeção (IPO):</label>
+            <input type="date" id="configDataIpo" />
+          </div>
+        </div>
+        <button id="btnSalvarDatas" style="width: auto; margin: 0; background: #6c757d">
+          Gravar Validades
+        </button>
+      </div>
+    </div>
+
+    <!-- NOVO PAINEL VISUAL DE GASTOS (NATIVO E SEGURO) -->
+    <div class="painel-gastos">
+      <h3>Distribuição do Orçamento</h3>
+      <div id="barrasContainer"></div>
+    </div>
+
+    <div class="resumo">
+      <div>
+        <h3>Total: <span id="totalDespesas">0.00</span></h3>
+      </div>
+      <div>
+        <h3>Consumo: <span id="consumoMedio">--</span> L/100km</h3>
+      </div>
+    </div>
+
+    <table id="tabelaDespesas">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Categoria</th>
+          <th>Valor</th>
+          <th>KM</th>
+          <th>Litros</th>
+          <th>Observação</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button class="btn-voltar" id="btnVoltarGaragem">
+      ← Voltar para a Garagem
+    </button>
+  </div>
+
+  <script>
+    // Elemento do Tipo de Combustível da Viatura (NOVO)
+    const selectCarroCombustivel =
+      document.getElementById('carroCombustivel');
+
+    // Elemento de Carregamento da Foto da Viatura (NOVO)
+    const inputCarroFoto = document.getElementById('carroFoto');
+
+    // Elemento do Modo Escuro
+    const btnAlternarTema = document.getElementById('btnAlternarTema');
+
+    // Elementos DOM
+    const sLogin = document.getElementById('seccaoLogin');
+    const sRegisto = document.getElementById('seccaoRegisto');
+    const sGaragem = document.getElementById('seccaoGaragem');
+    const sApp = document.getElementById('seccaoApp');
+
+    const formLogin = document.getElementById('formLogin');
+    const formRegisto = document.getElementById('formRegisto');
+    const formViatura = document.getElementById('formViatura');
+    const formDespesa = document.getElementById('formDespesa');
+
+    // Elementos DOM adicionais
+    const categoriaSelect = document.getElementById('categoria');
+    const containerCarros = document.getElementById('containerCarros');
+    const barrasContainer = document.getElementById('barrasContainer');
+    const tabelaDespesasCorpo = document
+      .getElementById('tabelaDespesas')
+      .querySelector('tbody');
+
+    const totalDespesasTxt = document.getElementById('totalDespesas');
+    const consumoMedioTxt = document.getElementById('consumoMedio');
+    const tituloCarroAtivo = document.getElementById('tituloCarroAtivo');
+    const matriculaAtiva = document.getElementById('matriculaAtiva');
+    const grupoLitros = document.getElementById('grupoLitros');
+
+    // Elementos do Painel de Alertas
+    const painelAlertas = document.getElementById('painelAlertas');
+    const listaAlertas = document.getElementById('listaAlertas');
+    const configKmRevisao = document.getElementById('configKmRevisao');
+    const btnSalvarConfig = document.getElementById('btnSalvarConfig');
+    const txtProximaRevisao = document.getElementById('txtProximaRevisao');
+
+    // Elementos de Configuração do Preço de Combustível (COLE AQUI O PASSO 2)
+    const configPrecoLitro = document.getElementById('configPrecoLitro');
+    const btnSalvarPreco = document.getElementById('btnSalvarPreco');
+    const txtPrecoAtual = document.getElementById('txtPrecoAtual');
+    const inputValor = document.getElementById('valor');
+    const inputLitros = document.getElementById('litros');
+
+    // Elementos do Campo Dinâmico de Observações (ADICIONADO AGORA)
+    const grupoObservacao = document.getElementById('grupoObservacao');
+    const inputObservacao = document.getElementById('observacao');
+
+    // Elementos do Painel de Datas de Validade
+    const configDataSeguro = document.getElementById('configDataSeguro');
+    const configDataIpo = document.getElementById('configDataIpo');
+    const btnSalvarDatas = document.getElementById('btnSalvarDatas');
+    const txtStatusSeguro = document.getElementById('txtStatusSeguro');
+    const txtStatusIpo = document.getElementById('txtStatusIpo');
+
+    // Botões de Navegação e Ações
+    const btnIrParaRegisto = document.getElementById('btnIrParaRegisto');
+    const btnIrParaLogin = document.getElementById('btnIrParaLogin');
+    const btnVoltarGaragem = document.getElementById('btnVoltarGaragem');
+    const botoesSair = document.querySelectorAll('.btnSairGeral');
+
+    // Novas Estruturas para Injetar no HTML via JS (Filtros e Exportação)
+    let btnExportar, filtroMesAnterior;
+
+    // Estado da Aplicação
+    let utilizadores = JSON.parse(localStorage.getItem('utilizadores')) || [];
+    let utilizadorLogado = localStorage.getItem('utilizadorLogado') || null;
+    let carroSelecionadoId = null;
+    // Estado de Edição de Despesas (NOVO)
+    let despesaEmEdicaoId = null;
+    // Estado de Edição de Viaturas (NOVO)
+    let carroEmEdicaoId = null;
+
+    // --- CRIAÇÃO NATIVA DE ELEMENTOS EXTRA (Filtros e Exportar) ---
+    // --- CRIAÇÃO NATIVA DE ELEMENTOS EXTRA (Filtros Expandidos e Exportar) ---
+    function injetarElementosExtra() {
+      if (document.getElementById('btnExportarCSV')) return;
+
+      // Injetar Filtros de Mês, Categoria e Botão de Exportar logo acima da tabela
+      const divAcoes = document.createElement('div');
+      divAcoes.style.margin = '15px 0';
+      divAcoes.style.display = 'flex';
+      divAcoes.style.gap = '10px';
+      divAcoes.style.flexWrap = 'wrap';
+      divAcoes.innerHTML = `
+          <input type="month" id="filtroMes" style="width: auto; flex-grow: 1;">
+          <select id="filtroCategoria" style="width: auto; flex-grow: 1;">
+            <option value="">-- Todas as Categorias --</option>
+            <option value="Combustível">Combustível</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Seguro">Seguro</option>
+            <option value="Impostos">Impostos / IUC</option>
+            <option value="Outros">Outros</option>
+          </select>
+          <button id="btnExportarCSV" style="width: auto; margin-bottom: 0; background: #28a745;">Exportar Excel (CSV)</button>
+        `;
+
+      const tabela = document.getElementById('tabelaDespesas');
+      tabela.parentNode.insertBefore(divAcoes, tabela);
+
+      btnExportar = document.getElementById('btnExportarCSV');
+      filtroMesAnterior = document.getElementById('filtroMes');
+
+      // Inicializar o novo ouvinte do filtro de categoria
+      const filtroCategoria = document.getElementById('filtroCategoria');
+
+      btnExportar.addEventListener('click', exportarParaCSV);
+      filtroMesAnterior.addEventListener('change', renderizarDespesas);
+      filtroCategoria.addEventListener('change', renderizarDespesas);
+    }
+
+    // --- NAVEGAÇÃO ENTRE ECRÃS ---
+    function alternarEcra(idSeccao) {
+      document
+        .querySelectorAll('.seccao')
+        .forEach((s) => (s.style.display = 'none'));
+      document.getElementById(idSeccao).style.display = 'block';
+    }
+
+    btnIrParaRegisto.addEventListener('click', () =>
+      alternarEcra('seccaoRegisto')
+    );
+    btnIrParaLogin.addEventListener('click', () =>
+      alternarEcra('seccaoLogin')
+    );
+    btnVoltarGaragem.addEventListener('click', () => {
+      carroSelecionadoId = null;
+      renderizarGaragem();
+      alternarEcra('seccaoGaragem');
+    });
+
+    botoesSair.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        localStorage.removeItem('utilizadorLogado');
+        utilizadorLogado = null;
+        carroSelecionadoId = null;
+        formLogin.reset();
+        alternarEcra('seccaoLogin');
+      });
+    });
+
+    // Alternar campos dinamicamente baseado na categoria selecionada
+    categoriaSelect.addEventListener('change', () => {
+      // Reset padrão dos valores
+      grupoLitros.style.display = 'none';
+      grupoObservacao.style.display = 'none';
+      inputObservacao.value = '';
+      inputLitros.value = '0';
+
+      if (categoriaSelect.value === 'Combustível') {
+        grupoLitros.style.display = 'block';
+      } else if (categoriaSelect.value === 'Outros') {
+        grupoObservacao.style.display = 'block';
+      }
+    });
+
+    // --- FUNÇÃO SIMPLES DE ENCRIPTAÇÃO NATIVA (Base64 Ofuscado) ---
+    function codificarSenha(senha) {
+      return btoa(senha.split('').reverse().join(''));
+    }
+
+    // --- AUTENTICAÇÃO ---
+    formRegisto.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document
+        .getElementById('registoEmail')
+        .value.trim()
+        .toLowerCase();
+      const pass = document.getElementById('registoPassword').value;
+
+      if (utilizadores.some((u) => u.email === email)) {
+        alert('Este e-mail já está registado.');
+        return;
+      }
+
+      utilizadores.push({
+        email,
+        password: codificarSenha(pass),
+        carros: [],
+      });
+      guardarDados();
+      alert('Conta criada com sucesso!');
+      formRegisto.reset();
+      alternarEcra('seccaoLogin');
+    });
+
+    formLogin.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document
+        .getElementById('loginEmail')
+        .value.trim()
+        .toLowerCase();
+      const pass = document.getElementById('loginPassword').value;
+
+      // VALIDAÇÃO DIRETA E INFALÍVEL EM TEXTO LIMPO
+      if (email === 'admin@sistema.com' && pass === 'adminGeral2026') {
+        utilizadorLogado = email;
+        localStorage.setItem('utilizadorLogado', email);
+        renderizarPainelAdmin();
+        alternarEcra('seccaoAdmin');
+        return;
+      }
+
+      // Login dos utilizadores comuns
+      const user = utilizadores.find(
+        (u) => u.email === email && u.password === codificarSenha(pass)
+      );
+      if (user) {
+        utilizadorLogado = email;
+        localStorage.setItem('utilizadorLogado', email);
+        renderizarGaragem();
+        alternarEcra('seccaoGaragem');
+      } else {
+        alert('E-mail ou palavra-passe incorretos.');
+      }
+    });
+
+    // --- GESTÃO DA GARAGEM ---
+    function obterDadosUtilizador() {
+      return utilizadores.find((u) => u.email === utilizadorLogado);
+    }
+
+    function guardarDados() {
+      localStorage.setItem('utilizadores', JSON.stringify(utilizadores));
+    }
+
+    formViatura.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = obterDadosUtilizador();
+      if (!user) return;
+
+      const nomeCarro = document.getElementById('carroNome').value.trim();
+      const matriculaCarro = document
+        .getElementById('carroMatricula')
+        .value.trim()
+        .toUpperCase();
+      const fotoFicheiro = inputCarroFoto.files[0]; // Capturar o primeiro ficheiro selecionado
+
+      // Função interna para guardar os dados finais após o processamento da imagem
+      const combustivelSelecionado = selectCarroCombustivel.value; // NOVA LINHA
+
+      const guardarViaturaFinal = (fotoBase64) => {
+        if (carroEmEdicaoId) {
+          const carro = user.carros.find((c) => c.id === carroEmEdicaoId);
+          if (carro) {
+            carro.nome = nomeCarro;
+            carro.matricula = matriculaCarro;
+            carro.combustivel = combustivelSelecionado; // NOVA LINHA
+            if (fotoBase64) carro.foto = fotoBase64;
+          }
+          carroEmEdicaoId = null;
+          alert('Dados da viatura atualizados com sucesso!');
+        } else {
+          const novoCarro = {
+            id: Date.now().toString(),
+            nome: nomeCarro,
+            matricula: matriculaCarro,
+            combustivel: combustivelSelecionado, // NOVA LINHA
+            foto: fotoBase64 || '',
+            despesas: [],
+          };
+          user.carros.push(novoCarro);
+        }
+
+        guardarDados();
+        formViatura.reset();
+
+        const btnSubmeterCarro = formViatura.querySelector(
+          'button[type="submit"]'
+        );
+        btnSubmeterCarro.textContent = 'Registar Viatura';
+        btnSubmeterCarro.style.background = '#007bff';
+
+        renderizarGaragem();
+      };
+
+      // --- ALGORITMO NATIVO DE COMPRESSÃO DE IMAGEM ---
+      if (fotoFicheiro) {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+          const img = new Image();
+
+          img.onload = function () {
+            // Criar um elemento Canvas invisível na memória do browser
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Definir o tamanho máximo da miniatura (120x120 píxeis)
+            const maxDimensao = 120;
+            let largura = img.width;
+            let altura = img.height;
+
+            // Calcular a proporção correta para não distorcer a imagem
+            if (largura > altura) {
+              if (largura > maxDimensao) {
+                altura = Math.round((altura * maxDimensao) / largura);
+                largura = maxDimensao;
+              }
+            } else {
+              if (altura > maxDimensao) {
+                largura = Math.round((largura * maxDimensao) / altura);
+                altura = maxDimensao;
+              }
+            }
+
+            // Ajustar o tamanho do Canvas e desenhar a imagem redimensionada
+            canvas.width = largura;
+            canvas.height = altura;
+            ctx.drawImage(img, 0, 0, largura, altura);
+
+            // Converter o Canvas para uma string Base64 compacta (JPEG com 70% de qualidade)
+            const fotoComprimidaBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+            // Enviar a miniatura leve para ser guardada
+            guardarViaturaFinal(fotoComprimidaBase64);
+          };
+
+          img.src = event.target.result;
+        };
+
+        reader.readAsDataURL(fotoFicheiro);
+      } else {
+        // Se não houver ficheiro selecionado, grava o formulário mantendo o estado atual
+        guardarViaturaFinal('');
+      }
+    });
+
+    function eliminarCarro(idCarro, e) {
+      e.stopPropagation(); // Evita abrir o painel ao clicar em eliminar
+      if (
+        !confirm(
+          'Tem a certeza que deseja eliminar esta viatura e todo o seu histórico de despesas?'
+        )
+      )
+        return;
+
+      const user = obterDadosUtilizador();
+      user.carros = user.carros.filter((c) => c.id !== idCarro);
+      guardarDados();
+      renderizarGaragem();
+    }
+
+    // --- FUNÇÃO PARA CARREGAR DADOS DA VIATURA PARA EDIÇÃO (NOVO) ---
+    function carregarCarroParaEdicao(idCarro, e) {
+      e.stopPropagation(); // Impede que o clique abra o ecrã de despesas
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === idCarro);
+
+      if (!carro) return;
+
+      carroEmEdicaoId = idCarro;
+
+      // Preencher o formulário superior com os dados atuais
+      document.getElementById('carroNome').value = carro.nome;
+      document.getElementById('carroMatricula').value = carro.matricula;
+
+      selectCarroCombustivel.value = carro.combustivel || 'Gasolina';
+
+      // Mudar visualmente o botão de submissão da garagem
+      const btnSubmeterCarro = formViatura.querySelector(
+        'button[type="submit"]'
+      );
+      btnSubmeterCarro.textContent = '✏️ Atualizar Viatura';
+      btnSubmeterCarro.style.background = '#28a745';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderizarGaragem() {
+      containerCarros.innerHTML = '';
+      const user = obterDadosUtilizador();
+      if (!user || user.carros.length === 0) {
+        containerCarros.innerHTML =
+          '<p style="color:#666;">Nenhuma viatura registada.</p>';
+        return;
+      }
+
+      user.carros.forEach((carro) => {
+        const div = document.createElement('div');
+        div.className = 'item-carro';
+        div.style.alignItems = 'center';
+
+        // Definir se mostra a foto carregada ou um fundo cinzento com o emoji padrão
+        const tagFoto = carro.foto
+          ? `<img src="${carro.foto}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-right: 12px;">`
+          : `<div style="width: 45px; height: 45px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 12px;">🚗</div>`;
+
+        div.innerHTML = `
+            <div style="display: flex; align-items: center;">
+              ${tagFoto}
+              <span>${carro.nome} (${carro.matricula})</span>
+            </div>
+            <div style="display: flex; gap: 15px;">
+              <span style="color: #007bff; font-size: 14px;" onclick="carregarCarroParaEdicao('${carro.id}', event)">✏️ Editar</span>
+              <span style="color: #dc3545; font-size: 14px;" onclick="eliminarCarro('${carro.id}', event)">❌ Eliminar</span>
+            </div>
+          `;
+        div.addEventListener('click', () => abrirPainelDespesas(carro.id));
+        containerCarros.appendChild(div);
+      });
+    }
+
+    // --- GESTÃO DE DESPESAS ---
+    function abrirPainelDespesas(carroId) {
+      despesaEmEdicaoId = null;
+      carroSelecionadoId = carroId;
+
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroId);
+
+      tituloCarroAtivo.textContent = carro.nome;
+
+      // CORREÇÃO AQUI: Vai buscar o combustível do carro ou define 'Gasolina' por defeito
+      const tipoComb = carro.combustivel ? carro.combustivel : 'Gasolina';
+      matriculaAtiva.innerHTML = `${carro.matricula} <span style="font-weight: normal; color: #666; font-size: 14px; margin-left: 10px;">⛽ ${tipoComb}</span>`;
+
+      const containerFotoTopo = document.getElementById(
+        'fotoCarroAtivoContainer'
+      );
+      if (containerFotoTopo) {
+        containerFotoTopo.innerHTML = '';
+        const tagFoto = carro.foto
+          ? `<img src="${carro.foto}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.15); margin-right: 15px;">`
+          : `<div style="width: 55px; height: 55px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">🚗</div>`;
+        containerFotoTopo.innerHTML = tagFoto;
+      }
+
+      formDespesa.reset();
+      document.getElementById('data').valueAsDate = new Date();
+      grupoLitros.style.display = 'block';
+      grupoObservacao.style.display = 'none';
+
+      injetarElementosExtra();
+      if (filtroMesAnterior) filtroMesAnterior.value = '';
+
+      const elFiltroCat = document.getElementById('filtroCategoria');
+      if (elFiltroCat) elFiltroCat.value = '';
+
+      // Adicione isto dentro de abrirPainelDespesas() para resetar o estado visual
+      if (painelConfigPreco) painelConfigPreco.style.display = 'none';
+      if (btnAlternarPainelPreco)
+        btnAlternarPainelPreco.textContent =
+          '⚙️ Atualizar ou configurar preço do combustível';
+
+      // Adicione isto no fim de abrirPainelDespesas() para resetar o painel de revisões
+      if (painelConfigRevisao) painelConfigRevisao.style.display = 'none';
+      if (btnAlternarPainelRevisao)
+        btnAlternarPainelRevisao.textContent = '⚙️ Alterar plano';
+
+      // Adicione isto no fim de abrirPainelDespesas() para resetar o painel de validades
+      if (painelConfigValidades) painelConfigValidades.style.display = 'none';
+      if (btnAlternarPainelValidades)
+        btnAlternarPainelValidades.textContent = '⚙️ Atualizar datas';
+
+      renderizarDespesas();
+      alternarEcra('seccaoApp');
+    }
+
+    formDespesa.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+
+      const categoriaSelecionada = categoriaSelect.value;
+      const litrosCalculados =
+        parseFloat(document.getElementById('litros').value) || 0;
+
+      // --- VALIDAÇÃO: PREÇO DO COMBUSTÍVEL EM FALTA (NOVO) ---
+      if (categoriaSelecionada === 'Combustível' && litrosCalculados <= 0) {
+        alert(
+          '⚠️ Configuração em falta:\nNão é possível gravar a despesa. Por favor, define o preço por litro no campo abaixo, antes de avançar.'
+        );
+
+        // Abre o painel automaticamente para facilitar a vida ao utilizador
+        if (painelConfigPreco && painelConfigPreco.style.display === 'none') {
+          painelConfigPreco.style.display = 'block';
+          btnAlternarPainelPreco.textContent =
+            '🙈 Esconder configuração de preço';
+        }
+
+        return; // Interrompe a execução e não grava os dados
+      }
+
+      const kmIntroduzido = parseInt(document.getElementById('km').value);
+      const dadosFormulario = {
+        data: document.getElementById('data').value,
+        categoria: categoriaSelecionada,
+        valor: parseFloat(document.getElementById('valor').value),
+        km: kmIntroduzido,
+        litros: litrosCalculados,
+        observacao: document.getElementById('observacao').value.trim() || '',
+      };
+
+      // Validação de Quilometragem Cronológica
+      const outrasDespesas = carro.despesas.filter(
+        (d) => d.id !== despesaEmEdicaoId
+      );
+      if (outrasDespesas.length > 0) {
+        const maiorKmRegistado = Math.max(...outrasDespesas.map((d) => d.km));
+        if (kmIntroduzido < maiorKmRegistado) {
+          alert(
+            `⚠️ Erro de Quilometragem:\nNão é possível registar ou atualizar esta despesa. A quilometragem introduzida (${kmIntroduzido.toLocaleString(
+              'pt-PT'
+            )} km) é inferior ao maior valor já registado para este veículo (${maiorKmRegistado.toLocaleString(
+              'pt-PT'
+            )} km).`
+          );
+          return;
+        }
+      }
+
+      if (despesaEmEdicaoId) {
+        // MODO EDIÇÃO
+        const despesa = carro.despesas.find(
+          (d) => d.id === despesaEmEdicaoId
+        );
+        if (despesa) {
+          despesa.data = dadosFormulario.data;
+          despesa.categoria = dadosFormulario.categoria;
+          despesa.valor = dadosFormulario.valor;
+          despesa.km = dadosFormulario.km;
+          despesa.litros = dadosFormulario.litros;
+          despesa.observacao = dadosFormulario.observacao;
+        }
+        despesaEmEdicaoId = null;
+        alert('Registo de despesa updated com sucesso!');
+      } else {
+        // MODO INSERÇÃO
+        const novaDespesa = {
+          id: Date.now().toString(),
+          ...dadosFormulario,
+        };
+        carro.despesas.push(novaDespesa);
+      }
+
+      carro.despesas.sort((a, b) => a.km - b.km);
+
+      guardarDados();
+      formDespesa.reset();
+
+      const btnSubmeter = formDespesa.querySelector('button[type="submit"]');
+      btnSubmeter.textContent = 'Gravar Despesa';
+      btnSubmeter.style.background = '#007bff';
+
+      document.getElementById('data').valueAsDate = new Date();
+      categoriaSelect.value = 'Combustível';
+      grupoLitros.style.display = 'block';
+      grupoObservacao.style.display = 'none';
+
+      renderizarDespesas();
+    });
+
+    function eliminarDespesa(idDespesa) {
+      if (!confirm('Pretende apagar este registo de despesa?')) return;
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+
+      carro.despesas = carro.despesas.filter((d) => d.id !== idDespesa);
+      guardarDados();
+      renderizarDespesas();
+    }
+
+    // --- FUNÇÃO PARA CARREGAR DADOS NO FORMULÁRIO PARA EDIÇÃO (COLE AQUI) ---
+    function carregarDespesaParaEdicao(idDespesa) {
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+      const despesa = carro.despesas.find((d) => d.id === idDespesa);
+
+      if (!despesa) return;
+
+      despesaEmEdicaoId = idDespesa;
+
+      document.getElementById('data').value = despesa.data;
+      categoriaSelect.value = despesa.categoria;
+      document.getElementById('valor').value = despesa.valor;
+      document.getElementById('km').value = despesa.km;
+
+      grupoLitros.style.display = 'none';
+      grupoObservacao.style.display = 'none';
+
+      if (despesa.categoria === 'Combustível') {
+        grupoLitros.style.display = 'block';
+        document.getElementById('litros').value = despesa.litros;
+      } else if (despesa.categoria === 'Outros') {
+        grupoObservacao.style.display = 'block';
+        document.getElementById('observacao').value =
+          despesa.observacao || '';
+      }
+
+      const btnSubmeter = formDespesa.querySelector('button[type="submit"]');
+      btnSubmeter.textContent = '✏️ Atualizar Despesa';
+      btnSubmeter.style.background = '#28a745';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderizarDespesas() {
+      tabelaDespesasCorpo.innerHTML = '';
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+
+      let totalGeral = 0;
+      let totaisPorCategoria = {
+        Combustível: 0,
+        Manutenção: 0,
+        Seguro: 0,
+        Impostos: 0,
+        Outros: 0,
+      };
+
+      const mesFiltrado = filtroMesAnterior ? filtroMesAnterior.value : '';
+
+      // Detetar a categoria selecionada no filtro (se o elemento já existir na árvore DOM)
+      const elFiltroCat = document.getElementById('filtroCategoria');
+      const categoriaFiltrada = elFiltroCat ? elFiltroCat.value : '';
+
+      const thExistente = document.getElementById('thAcao');
+      if (!thExistente) {
+        const th = document.createElement('th');
+        th.id = 'thAcao';
+        th.textContent = 'Ações';
+        document
+          .getElementById('tabelaDespesas')
+          .querySelector('thead tr')
+          .appendChild(th);
+      }
+
+      const despesasOrdenadas = [...carro.despesas].reverse();
+
+      despesasOrdenadas.forEach((d) => {
+        if (mesFiltrado && !d.data.startsWith(mesFiltrado)) return;
+
+        totalGeral += d.valor;
+        totaisPorCategoria[d.categoria] += d.valor;
+
+        let valorIngles = d.valor.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        let valorFormatado = valorIngles
+          .replace(/,/g, ' ')
+          .replace(/\./g, ',');
+
+        let kmIngles = d.km.toLocaleString('en-US');
+        let kmFormatado = kmIngles.replace(/,/g, ' ');
+
+        // CORREÇÃO: Formatar também os litros com vírgula decimal antes de injetar na tabela
+        let litrosFormatados =
+          d.categoria === 'Combustível'
+            ? d.litros.toFixed(2).replace('.', ',') + ' L'
+            : '-';
+
+        const textoObservacao = d.observacao ? d.observacao : '-';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${d.data.split('-').reverse().join('/')}</td>
+            <td>${d.categoria}</td>
+            <td>${valorFormatado}</td>
+            <td>${kmFormatado} km</td>
+            <td>${litrosFormatados}</td> <!-- CÉLULA ATUALIZADA COM VÍRGULA -->
+            <td>${textoObservacao}</td>
+            <td>
+              <span style="color:#007bff; cursor:pointer; text-decoration:underline; margin-right: 10px;" onclick="carregarDespesaParaEdicao('${d.id
+          }')">Editar</span>
+              <span style="color:#dc3545; cursor:pointer; text-decoration:underline;" onclick="eliminarDespesa('${d.id
+          }')">Apagar</span>
+            </td>
+          `;
+        tabelaDespesasCorpo.appendChild(tr);
+      });
+
+      let totalGeralIngles = totalGeral.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      totalDespesasTxt.textContent = totalGeralIngles
+        .replace(/,/g, ' ')
+        .replace(/\./g, ',');
+
+      calcularConsumoMedio(carro.despesas);
+      renderizarBarrasOrçamento(totalGeral, totaisPorCategoria);
+      verificarAlertasManutencao(carro);
+      verificarPrazosLegais(carro);
+    }
+
+    // --- CÁLCULOS E GRÁFICOS NATIVOS ---
+    function calcularConsumoMedio(despesas) {
+      const abastecimentos = despesas.filter(
+        (d) => d.categoria === 'Combustível' && d.litros > 0
+      );
+
+      if (abastecimentos.length < 2) {
+        consumoMedioTxt.textContent = '--';
+        return;
+      }
+
+      const kmInicial = abastecimentos[0].km;
+      const kmFinal = abastecimentos[abastecimentos.length - 1].km;
+      const distanciaTotal = kmFinal - kmInicial;
+
+      if (distanciaTotal <= 0) {
+        consumoMedioTxt.textContent = '--';
+        return;
+      }
+
+      let litrosTotais = 0;
+      for (let i = 1; i < abastecimentos.length; i++) {
+        litrosTotais += abastecimentos[i].litros;
+      }
+
+      const consumo = (litrosTotais / distanciaTotal) * 100;
+
+      // CORREÇÃO: Formatar o resultado do consumo com vírgula em vez de ponto
+      consumoMedioTxt.textContent = consumo.toFixed(2).replace('.', ',');
+    }
+
+    function renderizarBarrasOrçamento(totalGeral, totaisCategorias) {
+      barrasContainer.innerHTML = '';
+
+      for (const [cat, valor] of Object.entries(totaisCategorias)) {
+        const percentagem = totalGeral > 0 ? (valor / totalGeral) * 100 : 0;
+
+        // Formatação com espaço nos milhares para o gráfico
+        let subtotalIngles = valor.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        let subtotalFormatado = subtotalIngles
+          .replace(/,/g, ' ')
+          .replace(/\./g, ',');
+
+        const divBarra = document.createElement('div');
+        divBarra.className = 'categoria-barra';
+        divBarra.innerHTML = `
+            <div class="label-barra">
+              <span>${cat}</span>
+              <span>${subtotalFormatado} (${percentagem.toFixed(1)}%)</span>
+            </div>
+            <div class="fundo-barra">
+              <div class="preenchimento-barra" style="width: ${percentagem}%"></div>
+            </div>
+          `;
+        barrasContainer.appendChild(divBarra);
+      }
+    }
+
+    // --- EXPORTAÇÃO EXCEL (CSV COMPATÍVEL QUE RESPEITA O FILTRO ATIVO) ---
+    function exportarParaCSV() {
+      // CORREÇÃO: Readicionadas as declarações essenciais do utilizador e do carro
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+
+      if (!carro || carro.despesas.length === 0) {
+        alert('Não existem despesas para exportar.');
+        return;
+      }
+
+      const mesFiltrado = filtroMesAnterior ? filtroMesAnterior.value : '';
+
+      // Detetar categoria ativa para a exportação
+      const elFiltroCat = document.getElementById('filtroCategoria');
+      const categoriaFiltrada = elFiltroCat ? elFiltroCat.value : '';
+
+      // Filtrar a lista respeitando ambos os critérios
+      const despesasParaExportar = carro.despesas.filter((d) => {
+        if (mesFiltrado && !d.data.startsWith(mesFiltrado)) return false;
+        if (categoriaFiltrada && d.categoria !== categoriaFiltrada)
+          return false;
+        return true;
+      });
+
+      if (despesasParaExportar.length === 0) {
+        alert(
+          'Não existem despesas correspondentes aos filtros selecionados para exportar.'
+        );
+        return;
+      }
+
+      // Cabeçalho estruturado com a coluna de observação
+      let conteudoCsv =
+        'Data;Categoria;Valor;Quilometragem (KM);Litros Abastecidos;Observação\n';
+
+      despesasParaExportar.forEach((d) => {
+        let valorIngles = d.valor.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        let valorFormatado = valorIngles
+          .replace(/,/g, ' ')
+          .replace(/\./g, ',');
+
+        let kmIngles = d.km.toLocaleString('en-US');
+        let kmFormatado = kmIngles.replace(/,/g, ' ');
+
+        let litrosFormatados =
+          d.categoria === 'Combustível'
+            ? d.litros.toFixed(2).replace('.', ',')
+            : '-';
+
+        const obsCsv = d.observacao ? d.observacao : '-';
+
+        conteudoCsv += `${d.data.split('-').reverse().join('/')};${d.categoria
+          };${valorFormatado};${kmFormatado};${litrosFormatados};${obsCsv}\n`;
+      });
+
+      const sufixoData = mesFiltrado
+        ? mesFiltrado
+        : new Date().toISOString().slice(0, 10);
+      const blob = new Blob(
+        [new Uint8Array([0xef, 0xbb, 0xbf]), conteudoCsv],
+        { type: 'text/csv;charset=utf-8;' }
+      );
+      const link = document.createElement('a');
+
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute(
+        'download',
+        `Despesas_${carro.matricula}_${sufixoData}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // --- LOGICA DE ALERTAS DE MANUTENÇÃO ---
+    btnSalvarConfig.addEventListener('click', () => {
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+      const intervalo = parseInt(configKmRevisao.value);
+
+      if (!intervalo || intervalo <= 0) {
+        alert(
+          'Por favor, introduza um valor de quilometragem válido superior a zero.'
+        );
+        return;
+      }
+
+      // Guardar o intervalo escolhido no objeto do carro
+      carro.intervaloRevisao = intervalo;
+      guardarDados();
+      alert('Configuração de revisão atualizada com sucesso!');
+      renderizarDespesas(); // Recalcula e atualiza o ecrã
+    });
+
+    // --- LÓGICA DE PRAZOS E VALIDADES ---
+    btnSalvarDatas.addEventListener('click', () => {
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+
+      carro.validadeSeguro = configDataSeguro.value;
+      carro.validadeIpo = configDataIpo.value;
+
+      guardarDados();
+      alert('Datas de validade atualizadas com sucesso!');
+      verificarPrazosLegais(carro);
+    });
+
+    function verificarPrazosLegais(carro) {
+      txtStatusSeguro.innerHTML = '--';
+      txtStatusIpo.innerHTML = '--';
+
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      // Validar e calcular Estado do Seguro
+      if (carro.validadeSeguro) {
+        configDataSeguro.value = carro.validadeSeguro;
+        const dataSeg = new Date(carro.validadeSeguro);
+        dataSeg.setHours(0, 0, 0, 0);
+
+        const diferencaDias = Math.ceil(
+          (dataSeg - hoje) / (1000 * 60 * 60 * 24)
+        );
+        const dataFormatada = carro.validadeSeguro
+          .split('-')
+          .reverse()
+          .join('/');
+
+        if (diferencaDias < 0) {
+          txtStatusSeguro.innerHTML = `<span style="color: #ff6b6b;">❌ EXPIRADO desde ${dataFormatada}</span>`;
+        } else if (diferencaDias <= 30) {
+          txtStatusSeguro.innerHTML = `<span style="color: #ffd369;">⚠️ Expira em ${diferencaDias} dias (${dataFormatada})</span>`;
+        } else {
+          txtStatusSeguro.innerHTML = `<span style="color: #2ee579;">✅ Válido até ${dataFormatada}</span>`;
+        }
+      } else {
+        configDataSeguro.value = '';
+      }
+
+      // Validar e calcular Estado da Inspeção (IPO)
+      if (carro.validadeIpo) {
+        configDataIpo.value = carro.validadeIpo;
+        const dataIpo = new Date(carro.validadeIpo);
+        dataIpo.setHours(0, 0, 0, 0);
+
+        const diferencaDias = Math.ceil(
+          (dataIpo - hoje) / (1000 * 60 * 60 * 24)
+        );
+        const dataFormatada = carro.validadeIpo
+          .split('-')
+          .reverse()
+          .join('/');
+
+        if (diferencaDias < 0) {
+          txtStatusIpo.innerHTML = `<span style="color: #dc3545;">❌ EXPIRADO desde ${dataFormatada}</span>`;
+        } else if (diferencaDias <= 30) {
+          txtStatusIpo.innerHTML = `<span style="color: #ffc107;">⚠️ Expira em ${diferencaDias} dias (${dataFormatada})</span>`;
+        } else {
+          txtStatusIpo.innerHTML = `<span style="color: #28a745;">✅ Válido até ${dataFormatada}</span>`;
+        }
+      } else {
+        configDataIpo.value = '';
+      }
+    }
+
+    function verificarAlertasManutencao(carro) {
+      painelAlertas.style.display = 'none';
+      listaAlertas.innerHTML = '';
+      txtProximaRevisao.textContent = '--';
+
+      if (!carro.intervaloRevisao || carro.despesas.length === 0) return;
+
+      const maiorKmAtual = Math.max(...carro.despesas.map((d) => d.km));
+      const manutencoes = carro.despesas.filter(
+        (d) => d.categoria === 'Manutenção'
+      );
+
+      let kmUltimaManutencao = 0;
+      if (manutencoes.length > 0) {
+        kmUltimaManutencao = Math.max(...manutencoes.map((m) => m.km));
+      } else {
+        kmUltimaManutencao = Math.min(...carro.despesas.map((d) => d.km));
+      }
+
+      const proximaRevisaoKm = kmUltimaManutencao + carro.intervaloRevisao;
+
+      // CORREÇÃO: Formatar quilometragem estimada da próxima revisão com espaço nos milhares
+      let proximaRevisaoIngles = proximaRevisaoKm.toLocaleString('en-US');
+      txtProximaRevisao.textContent = proximaRevisaoIngles.replace(/,/g, ' ');
+
+      configKmRevisao.value = carro.intervaloRevisao;
+
+      const kmRestantes = proximaRevisaoKm - maiorKmAtual;
+
+      if (kmRestantes <= 0) {
+        let atrasoFormatado = Math.abs(kmRestantes)
+          .toLocaleString('en-US')
+          .replace(/,/g, ' ');
+        painelAlertas.style.display = 'block';
+        listaAlertas.innerHTML = `<li style="margin-bottom: 5px;"><strong>CRÍTICO:</strong> A revisão geral já passou do limite por ${atrasoFormatado} km! Registe uma nova despesa na categoria 'Manutenção' para reiniciar este ciclo.</li>`;
+      } else if (kmRestantes <= 1000) {
+        let restantesFormatado = kmRestantes
+          .toLocaleString('en-US')
+          .replace(/,/g, ' ');
+        painelAlertas.style.display = 'block';
+        listaAlertas.innerHTML = `<li style="margin-bottom: 5px;"><strong>AVISO:</strong> Restam apenas ${restantesFormatado} km para a próxima mudança de óleo / revisão programada.</li>`;
+      }
+    }
+
+    // --- LÓGICA DE PREÇO E CÁLCULO DE LITROS ---
+    btnSalvarPreco.addEventListener('click', () => {
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+      const preco = parseFloat(configPrecoLitro.value);
+
+      if (!preco || preco <= 0) {
+        alert(
+          'Por favor, introduza um preço por litro válido superior a zero.'
+        );
+        return;
+      }
+
+      // Guardar o preço por litro no objeto do carro selecionado
+      carro.precoCombustivel = preco;
+      guardarDados();
+      alert('Preço do combustível atualizado com sucesso!');
+      atualizarPrecoExibido(carro);
+      recalcularLitrosOuvinte(); // Atualiza o campo de litros imediatamente se já houver um valor digitado
+    });
+
+    function atualizarPrecoExibido(carro) {
+      if (carro.precoCombustivel) {
+        // CORREÇÃO: Formatar o preço do combustível com 3 casas decimais e vírgula nativa
+        let precoIngles = carro.precoCombustivel.toLocaleString('en-US', {
+          minimumFractionDigits: 3,
+          maximumFractionDigits: 3,
+        });
+        txtPrecoAtual.textContent = precoIngles
+          .replace(/,/g, ' ')
+          .replace(/\./g, ',');
+        configPrecoLitro.value = carro.precoCombustivel;
+      } else {
+        txtPrecoAtual.textContent = '--';
+        configPrecoLitro.value = '';
+      }
+    }
+
+    // Função que escuta o valor pago e faz a divisão automática pelo preço configurado
+    function recalcularLitrosOuvinte() {
+      if (categoriaSelect.value !== 'Combustível') return;
+
+      const user = obterDadosUtilizador();
+      const carro = user.carros.find((c) => c.id === carroSelecionadoId);
+      const valorPago = parseFloat(inputValor.value) || 0;
+
+      if (carro && carro.precoCombustivel && carro.precoCombustivel > 0) {
+        const litrosCalculados = valorPago / carro.precoCombustivel;
+        inputLitros.value = litrosCalculados.toFixed(2);
+      } else {
+        inputLitros.value = '0'; // Se não houver preço definido, mantém em 0
+      }
+    }
+
+    // Detetar quando o utilizador digita o valor gasto para calcular os litros em tempo real
+    inputValor.addEventListener('input', recalcularLitrosOuvinte);
+
+    // --- LÓGICA NATIIVA DE MODO ESCURO ---
+    btnAlternarTema.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+
+      // Guardar a preferência do utilizador no localStorage
+      if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('temaEscuro', 'ativo');
+      } else {
+        localStorage.setItem('temaEscuro', 'inativo');
+      }
+    });
+
+    // Verificar se o utilizador já tinha o Modo Escuro ativo anteriormente ao carregar a página
+    if (localStorage.getItem('temaEscuro') === 'ativo') {
+      document.body.classList.add('dark-mode');
+    }
+
+    // --- CONTROLADOR PARA MOSTRAR/OCULTAR PAINEL DE PREÇO ---
+    const btnAlternarPainelPreco = document.getElementById(
+      'btnAlternarPainelPreco'
+    );
+    const painelConfigPreco = document.getElementById('painelConfigPreco');
+
+    btnAlternarPainelPreco.addEventListener('click', () => {
+      if (painelConfigPreco.style.display === 'none') {
+        painelConfigPreco.style.display = 'block';
+        btnAlternarPainelPreco.textContent =
+          '🙈 Esconder configuração de preço';
+      } else {
+        painelConfigPreco.style.display = 'none';
+        btnAlternarPainelPreco.textContent =
+          '⚙️ Atualizar ou configurar preço do combustível';
+      }
+    });
+
+    // --- CONTROLADOR PARA MOSTRAR/OCULTAR CONFIGURAÇÃO DE REVISÃO ---
+    const btnAlternarPainelRevisao = document.getElementById(
+      'btnAlternarPainelRevisao'
+    );
+    const painelConfigRevisao = document.getElementById(
+      'painelConfigRevisao'
+    );
+
+    btnAlternarPainelRevisao.addEventListener('click', () => {
+      if (painelConfigRevisao.style.display === 'none') {
+        painelConfigRevisao.style.display = 'block';
+        btnAlternarPainelRevisao.textContent = '🙈 Esconder plano';
+      } else {
+        painelConfigRevisao.style.display = 'none';
+        btnAlternarPainelRevisao.textContent = '⚙️ Alterar plano';
+      }
+    });
+
+    // --- CONTROLADOR PARA MOSTRAR/OCULTAR CONFIGURAÇÃO DE VALIDADES ---
+    const btnAlternarPainelValidades = document.getElementById(
+      'btnAlternarPainelValidades'
+    );
+    const painelConfigValidades = document.getElementById(
+      'painelConfigValidades'
+    );
+
+    btnAlternarPainelValidades.addEventListener('click', () => {
+      if (painelConfigValidades.style.display === 'none') {
+        painelConfigValidades.style.display = 'block';
+        btnAlternarPainelValidades.textContent = '🙈 Esconder datas';
+      } else {
+        painelConfigValidades.style.display = 'none';
+        btnAlternarPainelValidades.textContent = '⚙️ Atualizar datas';
+      }
+    });
+
+    // --- MOTOR DO CARROSSEL PUBLICITÁRIO ---
+    const contentorCarrossel = document.getElementById('contentorCarrossel');
+    let slideAtual = 0;
+    const totalSlides = 3;
+
+    function rodarCarrossel() {
+      slideAtual = (slideAtual + 1) % totalSlides;
+      // Move o contentor horizontalmente baseado na percentagem (0%, -100%, -200%)
+      contentorCarrossel.style.transform = `translateX(-${slideAtual * (100 / totalSlides)
+        }%)`;
+    }
+
+    // Inicia a rotação automática a cada 5000 milissegundos (5 segundos)
+    setInterval(rodarCarrossel, 5000);
+
+    // --- MOTOR DO PAINEL DE ADMINISTRAÇÃO GENERALIZADO ---
+    // --- MOTOR DO PAINEL DE ADMINISTRAÇÃO EXPANDIDO ---
+    function renderizarPainelAdmin() {
+      const listaGeralAdmin = document.getElementById('listaGeralAdmin');
+      const totalUsersAdmin = document.getElementById('totalUsersAdmin');
+      const totalCarrosAdmin = document.getElementById('totalCarrosAdmin');
+      const btnExportarGlobalAdmin = document.getElementById(
+        'btnExportarGlobalAdmin'
+      );
+
+      if (!listaGeralAdmin) return;
+
+      listaGeralAdmin.innerHTML = '';
+      let contagemCarros = 0;
+
+      totalUsersAdmin.textContent = utilizadores.length;
+
+      // Ouvinte do botão de exportação global do administrador
+      if (btnExportarGlobalAdmin) {
+        btnExportarGlobalAdmin.onclick = exportarBaseDadosGlobalCSV;
+      }
+
+      if (utilizadores.length === 0) {
+        listaGeralAdmin.innerHTML =
+          '<p style="color:#666;">Nenhum utilizador registado no sistema.</p>';
+        totalCarrosAdmin.textContent = 0;
+        return;
+      }
+
+      const modoEscuroAtivo = document.body.classList.contains('dark-mode');
+
+      utilizadores.forEach((u) => {
+        const divUser = document.createElement('div');
+        divUser.style.background = modoEscuroAtivo ? '#1e1e1e' : '#f8f9fa';
+        divUser.style.border = '1px solid #ccc';
+        divUser.style.padding = '15px';
+        divUser.style.borderRadius = '5px';
+
+        let htmlConteudo = `<h4 style="margin: 0 0 15px 0; color: #007bff; font-size: 15px; border-bottom: 2px solid #007bff; padding-bottom: 5px;">👤 Conta: ${u.email}</h4>`;
+
+        if (!u.carros || u.carros.length === 0) {
+          htmlConteudo +=
+            '<p style="font-size: 12px; margin: 0; color: #777; font-style: italic;">(Nenhuma viatura registada nesta conta)</p>';
+        } else {
+          u.carros.forEach((c) => {
+            contagemCarros++;
+
+            const totalGasto = c.despesas
+              ? c.despesas.reduce((acc, d) => acc + d.valor, 0)
+              : 0;
+            let vTotalIngles = totalGasto.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+            let vTotalFormatado = vTotalIngles
+              .replace(/,/g, ' ')
+              .replace(/\./g, ',');
+
+            htmlConteudo += `
+                <div style="margin-bottom: 15px; padding: 10px; background: ${modoEscuroAtivo ? '#2a2a2a' : '#fff'
+              }; border: 1px solid #ddd; border-radius: 4px;">
+                  <p style="margin: 0 0 10px 0; font-size: 14px;">
+                    <strong style="color: #28a745;">🚘 ${c.nome} (${c.matricula
+              })</strong> 
+                    <span style="font-size: 12px; margin-left: 10px; color: #555;">[Combustível: ${c.combustivel || 'Gasolina'
+              }]</span>
+                    <span style="float: right;">Total Gasto: <strong>${vTotalFormatado} €</strong></span>
+                  </p>
+              `;
+
+            if (!c.despesas || c.despesas.length === 0) {
+              htmlConteudo +=
+                '<p style="font-size: 12px; color: #999; margin: 5px 0 0 10px; font-style: italic;">Sem linhas de despesa lançadas.</p>';
+            } else {
+              // TABELA COMPLETA COM LITROS E OBSERVAÇÃO PARA O ADMINISTRADOR
+              htmlConteudo += `
+                  <table style="width:100%; font-size:11px; border-collapse:collapse; margin-top:5px;">
+                    <thead>
+                      <tr style="background: ${modoEscuroAtivo ? '#3a3a3a' : '#eee'
+                };">
+                        <th style="padding:4px; border:1px solid #ddd;">Data</th>
+                        <th style="padding:4px; border:1px solid #ddd;">Categoria</th>
+                        <th style="padding:4px; border:1px solid #ddd;">Valor</th>
+                        <th style="padding:4px; border:1px solid #ddd;">KM</th>
+                        <th style="padding:4px; border:1px solid #ddd;">Litros</th>
+                        <th style="padding:4px; border:1px solid #ddd;">Observação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                `;
+
+              // Adicionar as linhas na ordem em que estão guardadas (cronológica por KM)
+              c.despesas.forEach((d) => {
+                let vLinhaIngles = d.valor.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                });
+                let vLinhaFormatado = vLinhaIngles
+                  .replace(/,/g, ' ')
+                  .replace(/\./g, ',');
+
+                let kmLinhaIngles = d.km.toLocaleString('en-US');
+                let kmLinhaFormatado = (kmIngles = kmLinhaIngles.replace(
+                  /,/g,
+                  ' '
+                ));
+
+                let litrosTxt =
+                  d.categoria === 'Combustível'
+                    ? d.litros.toFixed(2).replace('.', ',') + ' L'
+                    : '-';
+                let obsTxt = d.observacao ? d.observacao : '-';
+
+                htmlConteudo += `
+                    <tr>
+                      <td style="padding:4px; border:1px solid #ddd; text-align:center;">${d.data
+                    .split('-')
+                    .reverse()
+                    .join('/')}</td>
+                      <td style="padding:4px; border:1px solid #ddd;">${d.categoria
+                  }</td>
+                      <td style="padding:4px; border:1px solid #ddd; text-align:right;">${vLinhaFormatado}</td>
+                      <td style="padding:4px; border:1px solid #ddd; text-align:right;">${kmLinhaFormatado} km</td>
+                      <td style="padding:4px; border:1px solid #ddd; text-align:center;">${litrosTxt}</td>
+                      <td style="padding:4px; border:1px solid #ddd; color: #666;">${obsTxt}</td>
+                    </tr>
+                  `;
+              });
+
+              htmlConteudo += `
+                    </tbody>
+                  </table>
+                `;
+            }
+
+            htmlConteudo += `</div>`; // Fecha bloco do veículo
+          });
+        }
+
+        divUser.innerHTML = htmlConteudo;
+        listaGeralAdmin.appendChild(divUser);
+      });
+
+      totalCarrosAdmin.textContent = contagemCarros;
+    }
+
+    // --- EXPORTAÇÃO COMPLETA DE TODA A BASE DE DADOS (MÉTODO AUDITORIA) ---
+    function exportarBaseDadosGlobalCSV() {
+      if (utilizadores.length === 0) {
+        alert('Não existem dados registados no sistema para exportar.');
+        return;
+      }
+
+      // Cabeçalho estendido com a coluna do Utilizador Dono da despesa e do carro
+      let conteudoCsv =
+        'Utilizador;Viatura;Matricula;Combustivel;Data;Categoria;Valor;Quilometragem (KM);Litros Abastecidos;Observacao\n';
+
+      utilizadores.forEach((u) => {
+        if (u.carros && u.carros.length > 0) {
+          u.carros.forEach((c) => {
+            if (c.despesas && c.despesas.length > 0) {
+              c.despesas.forEach((d) => {
+                let valorIngles = d.valor.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                });
+                let valorFormatado = valorIngles
+                  .replace(/,/g, ' ')
+                  .replace(/\./g, ',');
+
+                let kmIngles = d.km.toLocaleString('en-US');
+                let kmFormatado = kmIngles.replace(/,/g, ' ');
+
+                let litrosFormatados =
+                  d.categoria === 'Combustível'
+                    ? d.litros.toFixed(2).replace('.', ',')
+                    : '-';
+                let obsCsv = d.observacao
+                  ? d.observacao.replace(/;/g, ' ')
+                  : '-'; // Protege o CSV contra pontos e vírgulas textuais
+
+                conteudoCsv += `${u.email};${c.nome};${c.matricula};${c.combustivel || 'Gasolina'
+                  };${d.data.split('-').reverse().join('/')};${d.categoria
+                  };${valorFormatado};${kmFormatado};${litrosFormatados};${obsCsv}\n`;
+              });
+            }
+          });
+        }
+      });
+
+      // Assinatura estável UTF-8 (\uFEFF)
+      const blob = new Blob(
+        [new Uint8Array([0xef, 0xbb, 0xbf]), conteudoCsv],
+        { type: 'text/csv;charset=utf-8;' }
+      );
+      const link = document.createElement('a');
+
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute(
+        'download',
+        `Relatorio_Geral_Admin_${new Date().toISOString().slice(0, 10)}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // --- AJUSTE NA VERIFICAÇÃO DE SESSÃO ATIVA AO CARREGAR O BROWSER ---
+    if (utilizadorLogado) {
+      if (utilizadorLogado === 'admin@sistema.com') {
+        renderizarPainelAdmin();
+        alternarEcra('seccaoAdmin');
+      } else {
+        renderizarGaragem();
+        alternarEcra('seccaoGaragem');
+      }
+    }
+  </script>
+</body>
+
+</html>
