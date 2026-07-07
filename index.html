@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Gestor de Despesas de Viaturas (Nativo e Estável)</title>
+  <title>Gestor de Viaturas</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -222,6 +222,78 @@
       text-decoration: underline;
     }
 
+    /* ESTILOS PARA O FOOTER (NOVO) */
+    .footer-global {
+      background-color: #f1f3f5;
+      color: #495057;
+      padding: 30px 20px 15px 20px;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      margin-top: 50px;
+      border-top: 1px solid #dee2e6;
+    }
+
+    .footer-conteudo {
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-coluna h4 {
+      margin: 0 0 10px 0;
+      color: #007bff;
+      font-size: 14px;
+    }
+
+    .footer-coluna p {
+      margin: 5px 0;
+      line-height: 1.4;
+    }
+
+    .footer-coluna a {
+      color: #495057;
+      text-decoration: none;
+    }
+
+    .footer-coluna a:hover {
+      text-decoration: underline;
+      color: #007bff;
+    }
+
+    .footer-inferior {
+      max-width: 700px;
+      margin: 20px auto 0 auto;
+      text-align: center;
+      border-top: 1px solid #dee2e6;
+      padding-top: 15px;
+      font-size: 11px;
+      color: #868e96;
+    }
+
+    /* Ajuste automático para o Modo Escuro */
+    body.dark-mode .footer-global {
+      background-color: #1a1a1a;
+      color: #adb5bd;
+      border-top: 1px solid #333;
+    }
+
+    body.dark-mode .footer-coluna a {
+      color: #adb5bd;
+    }
+
+    body.dark-mode .footer-coluna h4 {
+      color: #ffd369;
+      /* Tom dourado/amarelo suave para o modo escuro */
+    }
+
+    body.dark-mode .footer-inferior {
+      border-top: 1px solid #333;
+      color: #6c757d;
+    }
+
     /* Ajuste automático para o Modo Escuro */
     body.dark-mode .navbar {
       background-color: #1f1f1f;
@@ -232,6 +304,7 @@
 
 <body>
   <!-- BARRA DE NAVEGAÇÃO / NAVBAR (ESTRUTURA LIMPA PARA VS CODE) -->
+  <!-- BARRA DE NAVEGAÇÃO / NAVBAR (ATUALIZADA COM DESLIZE SUAVE) -->
   <nav class="navbar-global" style="
         background: #007bff !important;
         color: #ffffff !important;
@@ -255,12 +328,14 @@
       ⛽ <span>Gestor de Viaturas</span>
     </div>
     <div>
-      <a href="mailto:chitandala@gmail.com" target="_blank" style="
+      <!-- O link agora chama uma função que desliza o ecrã suavemente -->
+      <a href="#footerGlobal" style="
             color: #ffffff !important;
             text-decoration: none !important;
             font-weight: bold !important;
             font-size: 14px !important;
-          " onclick="alert('A abrir o seu cliente de e-mail para contacto com o suporte.')">📧 Contacto</a>
+          " onclick="document.getElementById('footerGlobal').scrollIntoView({ behavior: 'smooth' }); return false;">📧
+        Contacto</a>
     </div>
   </nav>
 
@@ -808,6 +883,51 @@
     </button>
   </div>
 
+  <!-- RODAPÉ / FOOTER GLOBAL (ATUALIZADO COM ID) -->
+  <footer class="footer-global" id="footerGlobal">
+    <div class="footer-conteudo">
+      <!-- Coluna 1: Sobre -->
+      <div class="footer-coluna" style="flex: 1; min-width: 200px">
+        <h4>⛽ Gestor de Viaturas</h4>
+        <p>
+          A plataforma definitiva para controlo local de consumos, manutenções
+          e validades legais da sua frota pessoal ou empresarial.
+        </p>
+      </div>
+
+      <!-- Coluna 2: Contactos -->
+      <div class="footer-coluna" style="flex: 1; min-width: 200px">
+        <h4>📞 Contactos de Suporte</h4>
+        <p>
+          <strong>E-mail:</strong>
+          <a href="mailto:chitandala@gmail.com" target="_blank">chitandala@gmail.com</a>
+        </p>
+        <p><strong>Telefone:</strong> +244 934 545 539</p>
+        <p>
+          <strong>WhatsApp:</strong>
+          <a href="https://wa.link/bikqsn" target="_blank">
+            +244 923 288 853</a>
+        </p>
+      </div>
+
+      <!-- Coluna 3: Localização -->
+      <div class="footer-coluna" style="flex: 1; min-width: 180px">
+        <h4>📍 Escritório Central</h4>
+        <p>Bairro Social da Juventude</p>
+        <p>Saco-mar, Namibe</p>
+        <p>Angola</p>
+      </div>
+    </div>
+
+    <!-- Direitos de Autor e Créditos -->
+    <div class="footer-inferior">
+      <p>
+        &copy; 2026 Gestor de Viaturas. Todos os direitos reservados. |
+        Desenvolvido com 💻 JoCaDa
+      </p>
+    </div>
+  </footer>
+
   <script>
     // Elemento do Tipo de Combustível da Viatura (NOVO)
     const selectCarroCombustivel =
@@ -1050,18 +1170,31 @@
         .getElementById('carroMatricula')
         .value.trim()
         .toUpperCase();
-      const fotoFicheiro = inputCarroFoto.files[0]; // Capturar o primeiro ficheiro selecionado
+      const fotoFicheiro = inputCarroFoto.files;
+
+      // --- VALIDAÇÃO DE MATRÍCULA ÚNICA (NOVO) ---
+      // Verifica se já existe outro carro com a mesma matrícula (excluindo o próprio carro em caso de edição)
+      const matriculaDuplicada = user.carros.some(
+        (c) => c.matricula === matriculaCarro && c.id !== carroEmEdicaoId
+      );
+
+      if (matriculaDuplicada) {
+        alert(
+          `⚠️ Erro de Registo:\nA matrícula/placa "${matriculaCarro}" já se encontra registada noutra viatura na sua garagem. Cada veículo deve ter uma matrícula única.`
+        );
+        return; // Interrompe a execução e não grava os dados
+      }
+
+      const combustivelSelecionado = selectCarroCombustivel.value;
 
       // Função interna para guardar os dados finais após o processamento da imagem
-      const combustivelSelecionado = selectCarroCombustivel.value; // NOVA LINHA
-
       const guardarViaturaFinal = (fotoBase64) => {
         if (carroEmEdicaoId) {
           const carro = user.carros.find((c) => c.id === carroEmEdicaoId);
           if (carro) {
             carro.nome = nomeCarro;
             carro.matricula = matriculaCarro;
-            carro.combustivel = combustivelSelecionado; // NOVA LINHA
+            carro.combustivel = combustivelSelecionado;
             if (fotoBase64) carro.foto = fotoBase64;
           }
           carroEmEdicaoId = null;
@@ -1071,7 +1204,7 @@
             id: Date.now().toString(),
             nome: nomeCarro,
             matricula: matriculaCarro,
-            combustivel: combustivelSelecionado, // NOVA LINHA
+            combustivel: combustivelSelecionado,
             foto: fotoBase64 || '',
             despesas: [],
           };
@@ -1090,24 +1223,18 @@
         renderizarGaragem();
       };
 
-      // --- ALGORITMO NATIVO DE COMPRESSÃO DE IMAGEM ---
-      if (fotoFicheiro) {
+      // Algoritmo nativo de compressão de imagem (Canvas)
+      if (fotoFicheiro && fotoFicheiro.length > 0) {
         const reader = new FileReader();
-
         reader.onload = function (event) {
           const img = new Image();
-
           img.onload = function () {
-            // Criar um elemento Canvas invisível na memória do browser
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-
-            // Definir o tamanho máximo da miniatura (120x120 píxeis)
             const maxDimensao = 120;
             let largura = img.width;
             let altura = img.height;
 
-            // Calcular a proporção correta para não distorcer a imagem
             if (largura > altura) {
               if (largura > maxDimensao) {
                 altura = Math.round((altura * maxDimensao) / largura);
@@ -1120,24 +1247,16 @@
               }
             }
 
-            // Ajustar o tamanho do Canvas e desenhar a imagem redimensionada
             canvas.width = largura;
             canvas.height = altura;
             ctx.drawImage(img, 0, 0, largura, altura);
-
-            // Converter o Canvas para uma string Base64 compacta (JPEG com 70% de qualidade)
             const fotoComprimidaBase64 = canvas.toDataURL('image/jpeg', 0.7);
-
-            // Enviar a miniatura leve para ser guardada
             guardarViaturaFinal(fotoComprimidaBase64);
           };
-
           img.src = event.target.result;
         };
-
-        reader.readAsDataURL(fotoFicheiro);
+        reader.readAsDataURL(fotoFicheiro[0]);
       } else {
-        // Se não houver ficheiro selecionado, grava o formulário mantendo o estado atual
         guardarViaturaFinal('');
       }
     });
