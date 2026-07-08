@@ -306,8 +306,7 @@
   </head>
 
   <body>
-    <!-- BARRA DE NAVEGAÇÃO / NAVBAR (ESTRUTURA LIMPA PARA VS CODE) -->
-    <!-- BARRA DE NAVEGAÇÃO / NAVBAR (ATUALIZADA COM DESLIZE SUAVE) -->
+    <!-- BARRA DE NAVEGAÇÃO / NAVBAR (ACTUALIZADA COM DESLIZE SUAVE) -->
     <nav
       class="navbar-global"
       style="
@@ -652,7 +651,7 @@
       <div id="containerCarros" class="lista-carros"></div>
     </div>
 
-    <!-- ECRÃ 5: PAINEL DE ADMINISTRAÇÃO (ATUALIZADO) -->
+    <!-- ECRÃ 5: PAINEL DE ADMINISTRAÇÃO (ACTUALIZADO) -->
     <div id="seccaoAdmin" class="seccao">
       <div
         style="
@@ -736,7 +735,7 @@
           align-items: center;
         "
       >
-        <!-- TITULO E FOTO DA VIATURA ATIVA (ATUALIZADO) -->
+        <!-- TITULO E FOTO DA VIATURA ATIVA (ACTUALIZADO) -->
         <div
           style="
             display: flex;
@@ -904,7 +903,7 @@
           class="link-alternar"
           id="btnAlternarPainelPreco"
           style="font-size: 13px"
-          >⚙️ Atualizar ou configurar preço do combustível</span
+          >⚙️ Actualizar ou configurar preço do combustível</span
         >
       </div>
 
@@ -965,7 +964,7 @@
             class="link-alternar"
             id="btnAlternarPainelValidades"
             style="font-size: 12px; margin-top: 0"
-            >⚙️ Atualizar datas</span
+            >⚙️ Actualizar datas</span
           >
         </div>
 
@@ -1057,7 +1056,7 @@
       </button>
     </div>
 
-    <!-- RODAPÉ / FOOTER GLOBAL (ATUALIZADO COM ID) -->
+    <!-- RODAPÉ / FOOTER GLOBAL (ACTUALIZADO COM ID) -->
     <footer class="footer-global" id="footerGlobal">
       <div class="footer-conteudo">
         <!-- Coluna 1: Sobre -->
@@ -1375,7 +1374,7 @@
               if (fotoBase64) carro.foto = fotoBase64;
             }
             carroEmEdicaoId = null;
-            alert('Dados da viatura atualizados com sucesso!');
+            alert('Dados da viatura actualizados com sucesso!');
           } else {
             const novoCarro = {
               id: Date.now().toString(),
@@ -1473,7 +1472,7 @@
         const btnSubmeterCarro = formViatura.querySelector(
           'button[type="submit"]'
         );
-        btnSubmeterCarro.textContent = '✏️ Atualizar Viatura';
+        btnSubmeterCarro.textContent = '✏️ Actualizar Viatura';
         btnSubmeterCarro.style.background = '#28a745';
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1553,7 +1552,7 @@
         if (painelConfigPreco) painelConfigPreco.style.display = 'none';
         if (btnAlternarPainelPreco)
           btnAlternarPainelPreco.textContent =
-            '⚙️ Atualizar ou configurar preço do combustível';
+            '⚙️ Actualizar ou configurar preço do combustível';
 
         // Adicione isto no fim de abrirPainelDespesas() para resetar o painel de revisões
         if (painelConfigRevisao) painelConfigRevisao.style.display = 'none';
@@ -1563,7 +1562,7 @@
         // Adicione isto no fim de abrirPainelDespesas() para resetar o painel de validades
         if (painelConfigValidades) painelConfigValidades.style.display = 'none';
         if (btnAlternarPainelValidades)
-          btnAlternarPainelValidades.textContent = '⚙️ Atualizar datas';
+          btnAlternarPainelValidades.textContent = '⚙️ Actualizar datas';
 
         renderizarDespesas();
         alternarEcra('seccaoApp');
@@ -1612,7 +1611,7 @@
           const maiorKmRegistado = Math.max(...outrasDespesas.map((d) => d.km));
           if (kmIntroduzido < maiorKmRegistado) {
             alert(
-              `⚠️ Erro de Quilometragem:\nNão é possível registar ou atualizar esta despesa. A quilometragem introduzida (${kmIntroduzido.toLocaleString(
+              `⚠️ Erro de Quilometragem:\nNão é possível registar ou actualizar esta despesa. A quilometragem introduzida (${kmIntroduzido.toLocaleString(
                 'pt-PT'
               )} km) é inferior ao maior valor já registado para este veículo (${maiorKmRegistado.toLocaleString(
                 'pt-PT'
@@ -1636,7 +1635,7 @@
             despesa.observacao = dadosFormulario.observacao;
           }
           despesaEmEdicaoId = null;
-          alert('Registo de despesa updated com sucesso!');
+          alert('Registo de despesa actualizado com sucesso!');
         } else {
           // MODO INSERÇÃO
           const novaDespesa = {
@@ -1701,7 +1700,7 @@
         }
 
         const btnSubmeter = formDespesa.querySelector('button[type="submit"]');
-        btnSubmeter.textContent = '✏️ Atualizar Despesa';
+        btnSubmeter.textContent = '✏️ Actualizar Despesa';
         btnSubmeter.style.background = '#28a745';
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1771,7 +1770,7 @@
             <td>${d.categoria}</td>
             <td>${valorFormatado}</td>
             <td>${kmFormatado} km</td>
-            <td>${litrosFormatados}</td> <!-- CÉLULA ATUALIZADA COM VÍRGULA -->
+            <td>${litrosFormatados}</td> <!-- CÉLULA ACTUALIZADA COM VÍRGULA -->
             <td>${textoObservacao}</td>
             <td>
               <span style="color:#007bff; cursor:pointer; text-decoration:underline; margin-right: 10px;" onclick="carregarDespesaParaEdicao('${
@@ -1955,7 +1954,7 @@
         // Guardar o intervalo escolhido no objeto do carro
         carro.intervaloRevisao = intervalo;
         guardarDados();
-        alert('Configuração de revisão atualizada com sucesso!');
+        alert('Configuração de revisão actualizada com sucesso!');
         renderizarDespesas(); // Recalcula e atualiza o ecrã
       });
 
@@ -1980,9 +1979,9 @@
             carro.dataIpo = dataIpoInput;
 
             guardarDados();
-            alert('Prazos de validade legais atualizados com sucesso!');
+            alert('Prazos de validade legais actualizados com sucesso!');
 
-            // Atualizar o ecrã com as novas cores e mensagens dinâmicas
+            // Actualizar o ecrã com as novas cores e mensagens dinâmicas
             verificarPrazosLegais(carro);
           });
       }
@@ -2106,7 +2105,7 @@
         // Guardar o preço por litro no objeto do carro selecionado
         carro.precoCombustivel = preco;
         guardarDados();
-        alert('Preço do combustível atualizado com sucesso!');
+        alert('Preço do combustível actualizado com sucesso!');
         atualizarPrecoExibido(carro);
         recalcularLitrosOuvinte(); // Atualiza o campo de litros imediatamente se já houver um valor digitado
       });
@@ -2184,7 +2183,7 @@
         } else {
           painelConfigPreco.style.display = 'none';
           btnAlternarPainelPreco.textContent =
-            '⚙️ Atualizar ou configurar preço do combustível';
+            '⚙️ Actualizar ou configurar preço do combustível';
         }
       });
 
@@ -2220,7 +2219,7 @@
           btnAlternarPainelValidades.textContent = '🙈 Esconder datas';
         } else {
           painelConfigValidades.style.display = 'none';
-          btnAlternarPainelValidades.textContent = '⚙️ Atualizar datas';
+          btnAlternarPainelValidades.textContent = '⚙️ Actualizar datas';
         }
       });
 
